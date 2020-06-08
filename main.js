@@ -231,6 +231,9 @@ let by;
 let cnt;
 
 function init(){
+
+    cnt = 1;
+
     field = [
         [9, 9, 9, 0, 0, 0, 0, 0, 0, 9, 9, 9,],
         [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
@@ -260,13 +263,27 @@ function init(){
     by = 0;
     btype = 0;
     brot = 0;
-    cnt = 1;
 }
 
 function update(){
     if(cnt % 30 == 0){
         // ブロックを１マス落下
         by++;
+
+        let breakflag = false;
+        for(let i = 0; i < BLOCK_HEIGHT; i++){
+            for(let j = 0; j < BLOCK_WIDTH; j++){
+                if(bx + j < 0 || bx + j >= FIELD_WIDTH || by + i < 0 || by + i >= FIELD_HEIGHT){
+                    continue;
+                }
+                if(field[by + i][bx + j] != 0 && block[btype][brot][i][j] == 1) {
+                    by--; // 移動距離分を戻す
+                    breakflag = true; // ループを抜ける
+                    break;
+                }
+            }
+            if(breakflag) break;
+        }
     }
 }
 
@@ -311,6 +328,8 @@ function main(){
     drawBrock();
     drawField();
     drawFrame();
+
+    cnt++;
 
     requestAnimationFrame(main);
 }
