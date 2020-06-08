@@ -218,6 +218,18 @@ let canvas = document.getElementById("canvas");
 let context = canvas.getContext("2d");
 
 let field;
+
+// ブロックの種類
+let btype
+// ブロックの回転タイプ
+let brot;
+// ブロック：x座標
+let bx;
+// ブロック：y座標
+let by;
+// カウンタ変数
+let cnt;
+
 function init(){
     field = [
         [9, 9, 9, 0, 0, 0, 0, 0, 0, 9, 9, 9,],
@@ -243,8 +255,33 @@ function init(){
         [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
         [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,],
         ];
+
+    bx = 4;
+    by = 0;
+    btype = 0;
+    brot = 0;
+    cnt = 1;
 }
 
+function update(){
+    if(cnt % 30 == 0){
+        // ブロックを１マス落下
+        by++;
+    }
+}
+
+function drawBrock(){
+    context.fillStyle = "rgba(255, 100, 100, 1.0)";
+
+    // ブロックを描画
+    for(let i = 0; i < BLOCK_HEIGHT; i++){
+        for(let j = 0; j < BLOCK_WIDTH; j++){
+            if(block[btype][brot][i][j] == 1){
+                context.fillRect(FIELD_X + (bx + j) * 25, FIELD_Y + (by + i) * 25, 25, 25);
+            }
+        }
+    }
+}
 function drawField(){
     for(let i = 0; i < FIELD_HEIGHT; i++){
         for(let j = 0; j < FIELD_WIDTH; j++){
@@ -269,6 +306,9 @@ init();
 requestAnimationFrame(main);
 function main(){
     context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+    update();
+    drawBrock();
     drawField();
     drawFrame();
 
