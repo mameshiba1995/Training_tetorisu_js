@@ -1,13 +1,20 @@
 // canvasの幅
-let CANVAS_WIDTH = 600;
+const CANVAS_WIDTH = 600;
 // canvasの高さ
-let CANVAS_HIGHT = 600;
+const CANVAS_HEIGHT = 600;
 
 // ブロックの領域：幅
-let BLOCK_WIDTH = 4;
+const BLOCK_WIDTH = 4;
 // ブロックの領域：高さ
-let BLOCK_HIGHT = 4;
+const BLOCK_HEIGHT = 4;
 
+// フィールドの領域：幅
+const FIELD_WIDTH = 12;
+// フィールドの領域：高さ
+const FIELD_HEIGHT = 22;
+
+let FIELD_X	= 40;
+let FIELD_Y	= 40;
 // ブロックの定義
 let block = [
     // **
@@ -210,7 +217,60 @@ let block = [
 let canvas = document.getElementById("canvas");
 let context = canvas.getContext("2d");
 
+let field;
+function init(){
+    field = [
+        [9, 9, 9, 0, 0, 0, 0, 0, 0, 9, 9, 9,],
+        [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
+        [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
+        [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
+        [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
+        [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
+        [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
+        [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
+        [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
+        [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
+        [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
+        [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
+        [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
+        [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
+        [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
+        [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
+        [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
+        [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
+        [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
+        [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
+        [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9,],
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,],
+        ];
+}
+
+function drawField(){
+    for(let i = 0; i < FIELD_HEIGHT; i++){
+        for(let j = 0; j < FIELD_WIDTH; j++){
+            if(field[i][j] == 0) continue;
+            context.fillStyle = "rgba(150, 150, 150, 1.0)";
+            context.fillRect(FIELD_X + j * 25, FIELD_Y + i * 25, 25, 25);
+        }
+    }
+}
+
+function drawFrame(){
+    context.fillStyle = "rgba(230, 230, 230, 1.0)";
+    for(let i = 0; i < FIELD_WIDTH + 1; i++){
+        context.fillRect(FIELD_X + i * 25, FIELD_Y, 1, 25 * FIELD_HEIGHT);
+    }
+    for(let i = 0; i < FIELD_HEIGHT + 1; i++){
+        context.fillRect(FIELD_X, FIELD_Y + i * 25, 25 * FIELD_WIDTH, 1);
+    }
+}
+
+init();
 requestAnimationFrame(main);
 function main(){
+    context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    drawField();
+    drawFrame();
+    
     requestAnimationFrame(main);
 }
