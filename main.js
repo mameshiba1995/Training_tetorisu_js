@@ -13,8 +13,8 @@ const FIELD_WIDTH = 12;
 // フィールドの領域：高さ
 const FIELD_HEIGHT = 22;
 
-let FIELD_X	= 40;
-let FIELD_Y	= 40;
+const FIELD_X	= 40;
+const FIELD_Y	= 40;
 // ブロックの定義
 let block = [
     // **
@@ -271,6 +271,6 @@ function main(){
     context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     drawField();
     drawFrame();
-    
+
     requestAnimationFrame(main);
 }
