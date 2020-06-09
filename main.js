@@ -25,7 +25,7 @@ const KEY_UP = 2;
 // 下キー
 const KEY_DOWN = 3;
 // スペースキー
-const KEY_SPACE =4; 
+const KEY_SPACE = 4; 
 // キー判定用変数
 let key = Array(5);
 key[KEY_RIGHT] = 0;
@@ -238,6 +238,8 @@ let context = canvas.getContext("2d");
 let field;
 // ブロック着地フラグ
 let bflag;
+// ブロックの削除フラグ
+let delflag;
 // ブロックの種類
 let btype
 // ブロックの回転タイプ
@@ -283,6 +285,7 @@ function init(){
     by = 0;
     btype = 0;
     brot = 0;
+    delflag = Array(FIELD_HEIGHT);
 }
 
 function keyCtrl(){
@@ -374,6 +377,39 @@ function enterBlock(){
             field[by + i][bx + j] = 1;
         }
     }
+
+    deleteJudge(); // 削除行を検索
+    bflag = false; // ブロック着地フラグを解除
+	bx = 4; // ブロックのX座標
+	by = -4; // ブロックのY座標
+	
+	btype = 0; // ブロックの種類
+	brot = 0; // ブロックの回転種類
+}
+
+// ブロックの削除判定
+function deleteJudge(){
+    for(var i = 1;i < FIELD_HEIGHT - 1;i++) { // 壁は含まないので「1〜FIELD_HEIGHT - 1」の間になります。
+		for(var j = 1;j < FIELD_WIDTH - 1;j++) {
+			if(field[i][j] != 0) {
+				delflag[i] = true;
+			}
+			else if(field[i][j] == 0) { // 行内に１つでも空白があったら削除フラグは立てずに、ループを抜ける
+				delflag[i] = false;
+				break;
+			}
+		}
+    }
+    
+	for(var i = 1;i < FIELD_HEIGHT - 1;i++) {
+		if(!delflag[i]) continue; // 削除フラグが立っていなかったら処理しない
+        
+        //	ブロック行を削除
+		for(var j = 1;j < FIELD_WIDTH - 1;j++) field[i][j] = 0;
+    }
+    
+    //	delflag の初期化
+    for(var i = 0;i < FIELD_HEIGHT;i++) delflag[i] = false;
 }
 
 function drawBrock(){
