@@ -236,7 +236,8 @@ let canvas = document.getElementById("canvas");
 let context = canvas.getContext("2d");
 
 let field;
-
+// ブロック着地フラグ
+let bflag;
 // ブロックの種類
 let btype
 // ブロックの回転タイプ
@@ -277,6 +278,7 @@ function init(){
         [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,],
         ];
 
+    bflag = false; //ブロック着地フラグ
     bx = 4;
     by = 0;
     btype = 0;
@@ -347,6 +349,7 @@ function update(){
                     continue;
                 }
                 if(field[by + i][bx + j] != 0 && block[btype][brot][i][j] == 1) {
+                    bflag = true;
                     by--; // 移動距離分を戻す
                     breakflag = true; // ループを抜ける
                     break;
@@ -357,9 +360,24 @@ function update(){
     }
 }
 
+// 落下ブロックの着地点登録
+function enterBlock(){
+    if(!bflag){
+        return;
+    }
+    for(let i = 0; i < BLOCK_HEIGHT; i++){
+        for(let j = 0; j < BLOCK_WIDTH; j++){
+            if(bx + j < 0 || bx + j >= FIELD_WIDTH || by + i < 0 || by + i >= FIELD_HEIGHT) continue;
+            //	ブロックが「０」なら処理しない
+            if(block[btype][brot][i][j] == 0) continue;
+            //	ブロックをフィールドに登録
+            field[by + i][bx + j] = 1;
+        }
+    }
+}
+
 function drawBrock(){
     context.fillStyle = "rgba(255, 100, 100, 1.0)";
-
     // ブロックを描画
     for(let i = 0; i < BLOCK_HEIGHT; i++){
         for(let j = 0; j < BLOCK_WIDTH; j++){
@@ -373,7 +391,13 @@ function drawField(){
     for(let i = 0; i < FIELD_HEIGHT; i++){
         for(let j = 0; j < FIELD_WIDTH; j++){
             if(field[i][j] == 0) continue;
-            context.fillStyle = "rgba(150, 150, 150, 1.0)";
+
+            let str;
+            switch(field[i][j]){
+                case 1: str = "rgba(255, 100, 100, 1.0)"; break; // 赤に設定
+			    case 9: str = "rgba(150, 150, 150, 1.0)"; break; // グレーに設定
+            }
+            context.fillStyle = str;
             context.fillRect(FIELD_X + j * 25, FIELD_Y + i * 25, 25, 25);
         }
     }
@@ -440,6 +464,7 @@ function main(){
 
     keyCtrl();
     update();
+    enterBlock();
     drawBrock();
     drawField();
     drawFrame();
