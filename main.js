@@ -1,3 +1,7 @@
+// タイトル画面
+const SCENE_TITLE   = 0;
+// ゲーム画面
+const SCENE_GAME    = 1;
 // canvasの幅
 const CANVAS_WIDTH = 600;
 // canvasの高さ
@@ -15,6 +19,11 @@ const FIELD_HEIGHT = 22;
 
 const FIELD_X	= 40;
 const FIELD_Y	= 40;
+
+// Next表示用の枠の左上座標（X）
+const NEXT_FIELD_X	= CANVAS_WIDTH - 200;
+// Next表示用の枠の左上座標（Y）
+const NEXT_FIELD_Y	= FIELD_Y;
 
 // 右キー
 const KEY_RIGHT = 0;
@@ -263,6 +272,17 @@ let bx;
 let by;
 // カウンタ変数
 let cnt;
+// Next表示用
+let nbtype;
+let nbrot;
+let nbcolor;
+
+// 落下速度
+let spd;
+// ゲームオーバーフラグ
+let gameoverflag;
+// 場面切り替え用変数
+let scene;
 
 function init(){
 
@@ -296,15 +316,45 @@ function init(){
     bflag = false; //ブロック着地フラグ
     bx = 4;
     by = 0;
+    nbtype = Math.floor(Math.random() * 7); // 次のブロックの種類
+	nbrot = Math.floor(Math.random() * 4); // 次のブロックの回転種類
+	nbcolor = Math.floor(Math.random() * 100); // 次のブロックの色
+	if(nbcolor < 35)		nbcolor = 1; // 赤色 35%
+	else if(nbcolor < 65)	nbcolor = 2; // 青色 30%
+	else if(nbcolor < 85)	nbcolor = 3; // 緑色 20%
+	else					nbcolor = 4; // 黄色 15%
     initBlock(); // ブロック初期化
     btype = 0;
     brot = 0;
     bcolor = 4; // ブロックの色
     delflag = Array(FIELD_HEIGHT);
     dropflag = false; // 行削除後のブロック落下フラグ
+    spd = 30;
+    gameoverflag = false; // ゲームオーバーフラグ
+
+    scene = SCENE_TITLE; // タイトル画面に設定
+}
+
+//	キー操作「可能・不可能」判定
+function ctrlJudge() {
+	var num; // 一番上にあるブロックの位置（行番号）
+	var breakflag = false;
+	
+	for(var i = 0;i < BLOCK_HEIGHT;i++) {
+		for(var j = 0;j < BLOCK_WIDTH;j++) {
+			if(block[btype][brot][i][j] == 1) { // ブロックなら
+				num = i; // 行番号を取得
+				breakflag = true; // ループを抜ける
+			}
+		}
+		if(breakflag) break;
+	}
+	return num; // 行番号を返す
 }
 
 function keyCtrl(){
+    if(by < -ctrlJudge()) return; // フィールドをはみ出していたら処理しない（０行目より上なら処理しない）
+
     if(key[KEY_RIGHT] <= 1 && key[KEY_LEFT] <= 1){
         bx += key[KEY_RIGHT] - key[KEY_LEFT];
 
@@ -371,7 +421,7 @@ function rowJudge(num) {
 	return flag;
 }
 function update(){
-    if(cnt % 30 == 0){
+    if(cnt % Math.floor(spd) == 0 || (key[KEY_SPACE] > 0 && cnt % 4 == 0)) {
         if(dropflag) { // 落下フラグがオンなら
 			var num = 0; // 削除された行の番号
 			
@@ -461,7 +511,10 @@ function enterBlock(){
 	btype = 0; // ブロックの種類
     brot = 0; // ブロックの回転種類
     bcolor = 4; // ブロックの色
-    initBlock(); // ブロック初期化
+    initBlock(); // 
+    spd -= 0.2; // スピードアップ（間隔縮小）
+	if(spd < 8) spd = 8;
+
 }
 
 // ブロックの削除判定
@@ -539,15 +592,66 @@ function drawFrame(){
     }
 }
 
+//	Nextブロック領域の描画
+function drawNextBlock() {
+	// 枠の描画
+	context.fillStyle = "rgba(230, 230, 230, 1.0)"; // 白色に設定
+	
+	context.fillRect(NEXT_FIELD_X,		NEXT_FIELD_Y,		150, 1);
+	context.fillRect(NEXT_FIELD_X,		NEXT_FIELD_Y + 150, 150, 1);
+	context.fillRect(NEXT_FIELD_X,		NEXT_FIELD_Y,		1, 150);
+	context.fillRect(NEXT_FIELD_X + 150,NEXT_FIELD_Y,		1, 150);
+	
+	// ブロックの描画
+	//	１：赤色　２：青色　３：緑色　４：黄色　９：灰色　に設定
+	var str;
+	switch(nbcolor) {
+	case 1: str = BLOCK_RED_COLOR; break;
+	case 2: str = BLOCK_BLU_COLOR; break;
+	case 3: str = BLOCK_GRE_COLOR; break;
+	case 4: str = BLOCK_YEL_COLOR; break;
+	case 9: str = "rgba(150, 150, 150, 1.0)"; break;
+	}
+	context.fillStyle = str;
+	
+	for(var i = 0;i < BLOCK_HEIGHT;i++) {
+		for(var j = 0;j < BLOCK_WIDTH;j++) {
+			if(block[nbtype][nbrot][i][j] == 1) {
+				context.fillRect(NEXT_FIELD_X + 25 + j * 25, NEXT_FIELD_Y + 15 + 25 + i * 25, 25, 25);
+			}
+		}
+	}
+ 
+	// ブロックの枠の描画
+	context.fillStyle = "rgba(230, 230, 230, 1.0)";
+	for(var i = 0;i < BLOCK_HEIGHT;i++) {
+		for(var j = 0;j < BLOCK_WIDTH;j++) {
+			if(block[nbtype][nbrot][i][j] == 1) {
+				context.fillRect(NEXT_FIELD_X + 25 + j * 25,		NEXT_FIELD_Y + 15 + 25 + i * 25,		25, 1);
+				context.fillRect(NEXT_FIELD_X + 25 + j * 25,		NEXT_FIELD_Y + 15 + 25 + i * 25 + 25,	25, 1);
+				context.fillRect(NEXT_FIELD_X + 25 + j * 25, 		NEXT_FIELD_Y + 15 + 25 + i * 25,		1, 25);
+				context.fillRect(NEXT_FIELD_X + 25 + j * 25 + 25,	NEXT_FIELD_Y + 15 + 25 + i * 25,		1, 25);
+			}
+		}
+	}
+	
+	context.font = "bold 20px sans-serif";
+	context.fillText("Next", NEXT_FIELD_X + 50, 60);
+	context.fillRect(NEXT_FIELD_X, 70, 150, 1);
+}
 // ブロック初期化関数
 function initBlock() {
-	btype = Math.floor(Math.random() * 7);	//	落下ブロックの種類
-	brot = Math.floor(Math.random() * 4);	//	落下ブロックの回転種類
-	bcolor = Math.floor(Math.random() * 100); // 落下ブロックの色
-	if(bcolor < 35)			bcolor = 1; // 赤色 35%
-	else if(bcolor < 65)	bcolor = 2; // 青色 30%
-	else if(bcolor < 85)	bcolor = 3; // 緑色 20%
-	else					bcolor = 4; // 黄色 15%
+	btype = nbtype; // 落下ブロックの種類
+	brot = nbrot; // 落下ブロックの回転種類
+	bcolor = nbcolor; // 落下ブロックの色
+	
+	nbtype = Math.floor(Math.random() * 7); // 次のブロックの種類
+	nbrot = Math.floor(Math.random() * 4); // 次のブロックの回転種類
+	nbcolor = Math.floor(Math.random() * 100); // 次のブロックの色
+	if(nbcolor < 35)		nbcolor = 1; // 赤色 35%
+	else if(nbcolor < 65)	nbcolor = 2; // 青色 30%
+	else if(nbcolor < 85)	nbcolor = 3; // 緑色 20%
+	else					nbcolor = 4; // 黄色 15%
 }
 
 document.addEventListener("keydown", e => {
@@ -569,6 +673,14 @@ document.addEventListener("keydown", e => {
         case 32:
             key[KEY_SPACE]++;
         break;
+        case 13:
+            if(scene == SCENE_TITLE){
+                scene = SCENE_GAME; // タイトルからゲーム画面に切り替え
+            }
+			if(gameoverflag){
+                init();
+            }
+        break; // ゲームオーバーならエンターでタイトルへ
     }
 });
 
@@ -599,14 +711,34 @@ requestAnimationFrame(main);
 function main(){
     context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    keyCtrl();
-    update();
-    enterBlock();
-    drawBrock();
-    drawField();
-    drawFrame();
+    if(scene == SCENE_TITLE) {
+		context.fillStyle = "rgba(230, 230, 230, 1.0)"; // 文字色の設定
+		context.font = "bold 48px sans-serif"; // 文字フォントの設定
+		context.fillText("テトリス", CANVAS_WIDTH / 3, CANVAS_HEIGHT / 3); // 文字の描画
+		context.font = "bold 32px sans-serif"; // 文字フォントの設定
+		context.fillText("はじめる（Enter）", CANVAS_WIDTH / 3, CANVAS_HEIGHT / 3 + 100); // 文字の描画
+	}
+	else if(scene == SCENE_GAME) {
+        if(!gameoverflag) {
+            // ゲームオーバーなら実行しない
+            keyCtrl();
+            update();
+            enterBlock();
+        }
+        drawBrock();
+        drawField();
+        drawFrame();
+        drawNextBlock();
 
-    cnt++;
+        cnt++;
 
+        //	ゲームオーバー判定（０行目にブロックが登録されたら）
+        for(var i = 0;i < FIELD_WIDTH;i++) {
+            if(field[0][i] != 0 && field[0][i] != 9) {
+                gameoverflag = true;
+                break;
+            }
+        }
+    }
     requestAnimationFrame(main);
 }
