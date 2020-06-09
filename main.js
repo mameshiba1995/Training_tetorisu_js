@@ -325,8 +325,8 @@ function keyCtrl(){
 					else if(brot > 3) brot = 0;
 					breakflag = true; // ループを抜ける
 					break;
-				}
-			}
+                }
+            }
 			if(breakflag) break;
 		}
 		
