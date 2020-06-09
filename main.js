@@ -34,7 +34,7 @@ key[KEY_UP] = 0;
 key[KEY_DOWN] = 0;
 key[KEY_SPACE] = 0;
 // ブロックの定義
-let block = [
+const block = [
     // **
     // **
     [
@@ -232,6 +232,15 @@ let block = [
     ],
 ];
 
+// 赤色
+const BLOCK_RED_COLOR	= "rgba(255, 100, 100, 1.0)";
+// 青色
+const BLOCK_BLU_COLOR	= "rgba(100, 100, 255, 1.0)";
+// 緑色
+const BLOCK_GRE_COLOR	= "rgba(100, 255, 100, 1.0)";
+// 黄色
+const BLOCK_YEL_COLOR	= "rgba(255, 255, 100, 1.0)";
+
 let canvas = document.getElementById("canvas");
 let context = canvas.getContext("2d");
 
@@ -241,11 +250,13 @@ let bflag;
 // ブロックの削除フラグ
 let delflag;
 // 行削除後のブロック落下フラグ
-var dropflag;
+let dropflag;
 // ブロックの種類
 let btype
 // ブロックの回転タイプ
 let brot;
+// ブロックのカラー
+let bcolor;
 // ブロック：x座標
 let bx;
 // ブロック：y座標
@@ -285,8 +296,10 @@ function init(){
     bflag = false; //ブロック着地フラグ
     bx = 4;
     by = 0;
+    initBlock(); // ブロック初期化
     btype = 0;
     brot = 0;
+    bcolor = 4; // ブロックの色
     delflag = Array(FIELD_HEIGHT);
     dropflag = false; // 行削除後のブロック落下フラグ
 }
@@ -446,7 +459,9 @@ function enterBlock(){
 	by = -4; // ブロックのY座標
 	
 	btype = 0; // ブロックの種類
-	brot = 0; // ブロックの回転種類
+    brot = 0; // ブロックの回転種類
+    bcolor = 4; // ブロックの色
+    initBlock(); // ブロック初期化
 }
 
 // ブロックの削除判定
@@ -477,7 +492,15 @@ function deleteJudge(){
 }
 
 function drawBrock(){
-    context.fillStyle = "rgba(255, 100, 100, 1.0)";
+    var str;
+	
+	switch(bcolor) {
+	    case 1: str = BLOCK_RED_COLOR; break;
+	    case 2: str = BLOCK_BLU_COLOR; break;
+	    case 3: str = BLOCK_GRE_COLOR; break;
+	    case 4: str = BLOCK_YEL_COLOR; break;
+	}
+	context.fillStyle = str; // 色の設定
     // ブロックを描画
     for(let i = 0; i < BLOCK_HEIGHT; i++){
         for(let j = 0; j < BLOCK_WIDTH; j++){
@@ -494,7 +517,10 @@ function drawField(){
 
             let str;
             switch(field[i][j]){
-                case 1: str = "rgba(255, 100, 100, 1.0)"; break; // 赤に設定
+                case 1: str = BLOCK_RED_COLOR; break; // 赤色
+			    case 2: str = BLOCK_BLU_COLOR; break; // 青色
+			    case 3: str = BLOCK_GRE_COLOR; break; // 緑色
+			    case 4: str = BLOCK_YEL_COLOR; break; // 黄色
 			    case 9: str = "rgba(150, 150, 150, 1.0)"; break; // グレーに設定
             }
             context.fillStyle = str;
@@ -511,6 +537,17 @@ function drawFrame(){
     for(let i = 0; i < FIELD_HEIGHT + 1; i++){
         context.fillRect(FIELD_X, FIELD_Y + i * 25, 25 * FIELD_WIDTH, 1);
     }
+}
+
+// ブロック初期化関数
+function initBlock() {
+	btype = Math.floor(Math.random() * 7);	//	落下ブロックの種類
+	brot = Math.floor(Math.random() * 4);	//	落下ブロックの回転種類
+	bcolor = Math.floor(Math.random() * 100); // 落下ブロックの色
+	if(bcolor < 35)			bcolor = 1; // 赤色 35%
+	else if(bcolor < 65)	bcolor = 2; // 青色 30%
+	else if(bcolor < 85)	bcolor = 3; // 緑色 20%
+	else					bcolor = 4; // 黄色 15%
 }
 
 document.addEventListener("keydown", e => {
