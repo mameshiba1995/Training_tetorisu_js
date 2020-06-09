@@ -15,6 +15,24 @@ const FIELD_HEIGHT = 22;
 
 const FIELD_X	= 40;
 const FIELD_Y	= 40;
+
+// 右キー
+const KEY_RIGHT = 0;
+// 左キー
+const KEY_LEFT = 1;
+// 上キー
+const KEY_UP = 2;
+// 下キー
+const KEY_DOWN = 3;
+// スペースキー
+const KEY_SPACE =4; 
+// キー判定用変数
+let key = Array(5);
+key[KEY_RIGHT] = 0;
+key[KEY_LEFT] = 0;
+key[KEY_UP] = 0;
+key[KEY_DOWN] = 0;
+key[KEY_SPACE] = 0;
 // ブロックの定義
 let block = [
     // **
