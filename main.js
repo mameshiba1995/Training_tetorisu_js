@@ -15,6 +15,24 @@ const FIELD_HEIGHT = 22;
 
 const FIELD_X	= 40;
 const FIELD_Y	= 40;
+
+// 右キー
+const KEY_RIGHT = 0;
+// 左キー
+const KEY_LEFT = 1;
+// 上キー
+const KEY_UP = 2;
+// 下キー
+const KEY_DOWN = 3;
+// スペースキー
+const KEY_SPACE =4; 
+// キー判定用変数
+let key = Array(5);
+key[KEY_RIGHT] = 0;
+key[KEY_LEFT] = 0;
+key[KEY_UP] = 0;
+key[KEY_DOWN] = 0;
+key[KEY_SPACE] = 0;
 // ブロックの定義
 let block = [
     // **
@@ -265,6 +283,58 @@ function init(){
     brot = 0;
 }
 
+function keyCtrl(){
+    if(key[KEY_RIGHT] <= 1 && key[KEY_LEFT] <= 1){
+        bx += key[KEY_RIGHT] - key[KEY_LEFT];
+
+        let breakflag = false;
+        for(let i = 0; i < BLOCK_HEIGHT; i++){
+            for(let j = 0; j < BLOCK_WIDTH; j++){
+                if(bx + j < 0 || bx + j >= FIELD_WIDTH || by + i < 0 || by + i >= FIELD_HEIGHT){
+                    continue;
+                }
+                // 当たり判定
+				if(field[by + i][bx + j] != 0 && block[btype][brot][i][j] == 1) {
+					bx -= key[KEY_RIGHT] - key[KEY_LEFT]; // 移動距離分を戻す
+					breakflag = true; // ループを抜ける
+					break;
+				}
+            }
+            if(breakflag) break;
+        }
+        // キーの状態を更新
+		if(key[KEY_RIGHT] == 1) key[KEY_RIGHT]++;
+		else if(key[KEY_LEFT] == 1) key[KEY_LEFT]++;
+    }
+    if(key[KEY_DOWN] <= 1 && key[KEY_UP] <= 1) {
+		brot += key[KEY_DOWN] - key[KEY_UP]; // 回転
+		if(brot < 0) brot = 3;
+		else if(brot > 3) brot = 0;
+		
+		var breakflag = false;
+		for(var i = 0;i < BLOCK_HEIGHT;i++) {
+			for(var j = 0;j < BLOCK_WIDTH;j++) {
+				// 配列番号がおかしかったら処理しない
+				if(bx + j < 0 || bx + j >= FIELD_WIDTH || by + i < 0 || by + i >= FIELD_HEIGHT){
+                    continue;
+                }
+				// 当たり判定
+				if((field[by + i][bx + j] != 0 && block[btype][brot][i][j] == 1) || (block[btype][brot][i][j] == 1 && by + i < 0)) {
+					brot -= key[KEY_DOWN] - key[KEY_UP]; // 回転を戻す
+					if(brot < 0) brot = 3;
+					else if(brot > 3) brot = 0;
+					breakflag = true; // ループを抜ける
+					break;
+                }
+            }
+			if(breakflag) break;
+		}
+		
+		// キーの状態を更新
+		if(key[KEY_DOWN] == 1) key[KEY_DOWN]++;
+		else if(key[KEY_UP] == 1) key[KEY_UP]++;
+	}
+}
 function update(){
     if(cnt % 30 == 0){
         // ブロックを１マス落下
@@ -319,11 +389,56 @@ function drawFrame(){
     }
 }
 
+document.addEventListener("keydown", e => {
+    let keyCode = e.keyCode;
+
+    switch(keyCode){
+        case 39:
+            key[KEY_RIGHT]++;
+        break;
+        case 37:
+            key[KEY_LEFT]++;
+        break;
+        case 38:
+            key[KEY_UP]++;
+        break;
+        case 40:
+            key[KEY_DOWN]++;
+        break;
+        case 32:
+            key[KEY_SPACE]++;
+        break;
+    }
+});
+
+document.addEventListener("keyup", e => {
+    let keyCode = e.keyCode;
+
+    switch(keyCode){
+        case 39:
+            key[KEY_RIGHT] = 0;
+        break;
+        case 37:
+            key[KEY_LEFT] = 0;
+        break;
+        case 38:
+            key[KEY_UP] = 0;
+        break;
+        case 40:
+            key[KEY_DOWN] = 0;
+        break;
+        case 32:
+            key[KEY_SPACE] = 0;
+        break;
+    }
+});
+
 init();
 requestAnimationFrame(main);
 function main(){
     context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
+    keyCtrl();
     update();
     drawBrock();
     drawField();
